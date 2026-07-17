@@ -1,5 +1,6 @@
 import Icon from '../atoms/Icon'
 import Badge from '../atoms/Badge'
+import Button from '../atoms/Button'
 import { formatDate } from '../utils/dataHelpers'
 import './AppointmentCard.css'
 
@@ -15,7 +16,7 @@ const STATUS_LABEL = {
   cancelada: 'Cancelada',
 }
 
-function AppointmentCard({ appointment }) {
+function AppointmentCard({ appointment, onCancel }) {
   const { specialty, doctor, date, time, location, status } = appointment
 
   return (
@@ -39,6 +40,11 @@ function AppointmentCard({ appointment }) {
           <span>{location}</span>
         </li>
       </ul>
+      {onCancel && status !== 'cancelada' && (
+        <Button variant="danger" fullWidth onClick={onCancel}>
+          Cancelar cita
+        </Button>
+      )}
     </article>
   )
 }

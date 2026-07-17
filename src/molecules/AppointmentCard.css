@@ -44,3 +44,9 @@
   color: var(--color-primary);
   flex-shrink: 0;
 }
+
+
+
+.appointment-card > .btn {
+  margin-top: var(--space-3);
+}
