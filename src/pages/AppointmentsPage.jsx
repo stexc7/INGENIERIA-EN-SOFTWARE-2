@@ -7,7 +7,7 @@ import './AppointmentsPage.css'
 
 function AppointmentsPage() {
   const { user } = useAuth()
-  const { appointments } = useAppointments()
+  const { appointments, cancelAppointment } = useAppointments()
   const location = useLocation()
 
   const today = new Date().toISOString().slice(0, 10)
@@ -18,6 +18,15 @@ function AppointmentsPage() {
   const past = mine
     .filter((appt) => appt.date < today)
     .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+
+  function handleCancel(appointment) {
+    const confirmed = window.confirm(
+      `¿Seguro que deseas cancelar tu cita de ${appointment.specialty} del ${appointment.date}?`,
+    )
+    if (confirmed) {
+      cancelAppointment(appointment.id)
+    }
+  }
 
   return (
     <div className="appointments-page">
@@ -39,7 +48,7 @@ function AppointmentsPage() {
           <ul className="appointments-page__list">
             {upcoming.map((appt) => (
               <li key={appt.id}>
-                <AppointmentCard appointment={appt} />
+                <AppointmentCard appointment={appt} onCancel={() => handleCancel(appt)} />
               </li>
             ))}
           </ul>

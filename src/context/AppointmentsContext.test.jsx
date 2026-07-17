@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { AppointmentsProvider, useAppointments } from './AppointmentsContext'
 
 function Probe() {
-  const { appointments, addAppointment } = useAppointments()
+  const { appointments, addAppointment, cancelAppointment } = useAppointments()
   return (
     <div>
       <p data-testid="count">{appointments.length}</p>
@@ -22,6 +22,7 @@ function Probe() {
       >
         add
       </button>
+      <button onClick={() => cancelAppointment(appointments[0]?.id)}>cancel-first</button>
     </div>
   )
 }
@@ -54,5 +55,16 @@ describe('AppointmentsContext', () => {
     const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments'))
     const created = stored.find((appt) => appt.specialty === 'Cardiología')
     expect(created.status).toBe('pendiente')
+  })
+
+  it('cancels an existing appointment and persists the change', async () => {
+    render(
+      <AppointmentsProvider>
+        <Probe />
+      </AppointmentsProvider>,
+    )
+    await userEvent.click(screen.getByText('cancel-first'))
+    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments'))
+    expect(stored[0].status).toBe('cancelada')
   })
 })
