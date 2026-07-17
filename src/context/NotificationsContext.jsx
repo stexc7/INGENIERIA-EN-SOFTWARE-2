@@ -16,8 +16,12 @@ export function NotificationsProvider({ children }) {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
   }
 
+  function markAllAsRead(userId) {
+    setNotifications((prev) => prev.map((n) => (n.userId === userId ? { ...n, read: true } : n)))
+  }
+
   return (
-    <NotificationsContext.Provider value={{ notifications, markAsRead }}>
+    <NotificationsContext.Provider value={{ notifications, markAsRead, markAllAsRead }}>
       {children}
     </NotificationsContext.Provider>
   )
