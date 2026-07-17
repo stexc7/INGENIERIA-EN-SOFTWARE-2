@@ -1,0 +1,26 @@
+.login-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  text-align: center;
+}
+
+.login-page__header {
+  margin-bottom: var(--space-5);
+}
+
+.login-page__header h1 {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+}
+
+.login-page__header p {
+  color: var(--color-text-secondary);
+}
+
+.login-page__hint {
+  margin-top: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}

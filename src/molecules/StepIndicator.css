@@ -1,0 +1,51 @@
+.step-indicator {
+  display: flex;
+  list-style: none;
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  gap: var(--space-2);
+}
+
+.step-indicator__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.step-indicator__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-alt);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid var(--color-border);
+}
+
+.step-indicator__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.step-indicator__item--current .step-indicator__badge {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.step-indicator__item--current .step-indicator__label {
+  color: var(--color-primary-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+.step-indicator__item--done .step-indicator__badge {
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
