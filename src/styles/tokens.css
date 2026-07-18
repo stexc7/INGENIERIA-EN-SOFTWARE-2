@@ -28,12 +28,13 @@
 
   /* Tipografía — base 18px (mayor al estándar de 16px) para lectura cómoda */
   --font-family-base: "Segoe UI", Verdana, Arial, sans-serif;
-  --font-size-sm: 16px;
-  --font-size-base: 18px;
-  --font-size-md: 20px;
-  --font-size-lg: 24px;
-  --font-size-xl: 30px;
-  --font-size-xxl: 36px;
+  --font-scale: 1;
+  --font-size-sm: calc(16px * var(--font-scale));
+  --font-size-base: calc(18px * var(--font-scale));
+  --font-size-md: calc(20px * var(--font-scale));
+  --font-size-lg: calc(24px * var(--font-scale));
+  --font-size-xl: calc(30px * var(--font-scale));
+  --font-size-xxl: calc(36px * var(--font-scale));
   --line-height-base: 1.6;
   --font-weight-regular: 400;
   --font-weight-bold: 700;
