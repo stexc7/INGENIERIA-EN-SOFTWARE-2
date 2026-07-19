@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useFontSize } from '../context/FontSizeContext'
 import Badge from '../atoms/Badge'
 import Button from '../atoms/Button'
 import './ProfilePage.css'
@@ -7,6 +8,7 @@ import './ProfilePage.css'
 function ProfilePage() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { scale, increaseFontSize, decreaseFontSize, resetFontSize } = useFontSize()
 
   if (!user) return null
 
@@ -46,6 +48,16 @@ function ProfilePage() {
         </div>
       </section>
 
+      <section className="profile-page__section" aria-labelledby="fontsize-heading">
+        <h3 id="fontsize-heading">Tamaño de letra</h3>
+        <div className="profile-page__fontsize-controls">
+          <Button variant="secondary" onClick={decreaseFontSize} ariaLabel="Reducir tamaño de letra">A-</Button>
+          <span>{Math.round(scale * 100)}%</span>
+          <Button variant="secondary" onClick={increaseFontSize} ariaLabel="Aumentar tamaño de letra">A+</Button>
+        </div>
+        <Button variant="ghost" fullWidth onClick={resetFontSize}>Restablecer tamaño</Button>
+      </section>
+
       <Button variant="secondary" fullWidth onClick={toggleTheme}>
         {theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
       </Button>
@@ -58,4 +70,3 @@ function ProfilePage() {
 }
 
 export default ProfilePage
-

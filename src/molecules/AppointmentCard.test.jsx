@@ -29,4 +29,14 @@ describe('AppointmentCard', () => {
     render(<AppointmentCard appointment={{ ...appointment, status: 'reprogramada' }} />)
     expect(screen.getByText('reprogramada')).toBeInTheDocument()
   })
+
+  it('shows a cancel button for a non-cancelled appointment when onCancel is provided', () => {
+    render(<AppointmentCard appointment={appointment} onCancel={() => {}} />)
+    expect(screen.getByRole('button', { name: 'Cancelar cita' })).toBeInTheDocument()
+  })
+
+  it('does not show a cancel button for an already cancelled appointment', () => {
+    render(<AppointmentCard appointment={{ ...appointment, status: 'cancelada' }} onCancel={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'Cancelar cita' })).not.toBeInTheDocument()
+  })
 })

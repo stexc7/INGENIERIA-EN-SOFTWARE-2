@@ -22,8 +22,16 @@ export function AppointmentsProvider({ children }) {
     return appointment
   }
 
+  function cancelAppointment(id) {
+    setAppointments((prev) =>
+      prev.map((appointment) =>
+        appointment.id === id ? { ...appointment, status: 'cancelada' } : appointment,
+      ),
+    )
+  }
+
   return (
-    <AppointmentsContext.Provider value={{ appointments, addAppointment }}>
+    <AppointmentsContext.Provider value={{ appointments, addAppointment, cancelAppointment }}>
       {children}
     </AppointmentsContext.Provider>
   )
