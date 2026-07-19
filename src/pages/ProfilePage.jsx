@@ -1,10 +1,12 @@
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import Badge from '../atoms/Badge'
 import Button from '../atoms/Button'
 import './ProfilePage.css'
 
 function ProfilePage() {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   if (!user) return null
 
@@ -44,6 +46,10 @@ function ProfilePage() {
         </div>
       </section>
 
+      <Button variant="secondary" fullWidth onClick={toggleTheme}>
+        {theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      </Button>
+
       <Button variant="danger" fullWidth onClick={logout}>
         Cerrar sesión
       </Button>
@@ -52,3 +58,4 @@ function ProfilePage() {
 }
 
 export default ProfilePage
+
