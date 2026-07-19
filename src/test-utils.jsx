@@ -1,5 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 import { render } from '@testing-library/react'
+import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { AppointmentsProvider } from './context/AppointmentsContext'
 import { NotificationsProvider } from './context/NotificationsContext'
@@ -15,11 +16,13 @@ export function loginAs(username) {
 export function renderWithProviders(ui, { route = '/inicio' } = {}) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <AuthProvider>
-        <AppointmentsProvider>
-          <NotificationsProvider>{ui}</NotificationsProvider>
-        </AppointmentsProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppointmentsProvider>
+            <NotificationsProvider>{ui}</NotificationsProvider>
+          </AppointmentsProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </MemoryRouter>,
   )
 }
