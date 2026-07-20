@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { useFontSize } from '../context/FontSizeContext'
 import Badge from '../atoms/Badge'
 import Button from '../atoms/Button'
@@ -6,6 +7,7 @@ import './ProfilePage.css'
 
 function ProfilePage() {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const { scale, increaseFontSize, decreaseFontSize, resetFontSize } = useFontSize()
 
   if (!user) return null
@@ -55,6 +57,10 @@ function ProfilePage() {
         </div>
         <Button variant="ghost" fullWidth onClick={resetFontSize}>Restablecer tamaño</Button>
       </section>
+
+      <Button variant="secondary" fullWidth onClick={toggleTheme}>
+        {theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      </Button>
 
       <Button variant="danger" fullWidth onClick={logout}>
         Cerrar sesión
