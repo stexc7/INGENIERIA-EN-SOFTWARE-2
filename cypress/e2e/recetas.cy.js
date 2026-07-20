@@ -7,9 +7,7 @@ describe('Recetas', () => {
     cy.contains('a', 'Citas') // sanity: bottom nav rendered
     cy.get('nav[aria-label="Navegación principal"]').contains('a', 'Recetas').click()
     cy.url().should('include', '/recetas')
-
     cy.contains('button', 'Metformina 850mg').click()
-
     cy.url().should('match', /\/recetas\/r1$/)
     cy.contains('h2', 'Metformina 850mg').should('be.visible')
     cy.contains('Indicaciones').should('be.visible')
@@ -18,7 +16,7 @@ describe('Recetas', () => {
   })
 
   it('can open the latest prescription directly from the home screen', () => {
-    cy.visit('/inicio')
+    cy.loginAsPriscila('/inicio')
     cy.contains('Última receta')
     cy.contains('button', 'Metformina 850mg').click()
     cy.url().should('match', /\/recetas\/r1$/)
