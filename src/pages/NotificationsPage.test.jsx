@@ -26,4 +26,22 @@ describe('NotificationsPage', () => {
     const updated = stored.find((n) => n.id === 'n1')
     expect(updated.read).toBe(true)
   })
+
+  it('shows the "mark all as read" button only when there are unread notifications', () => {
+    loginAs('priscila')
+    renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
+    expect(screen.getByRole('button', { name: 'Marcar todas como leídas' })).toBeInTheDocument()
+  })
+
+  it('marks every notification as read when clicking "mark all as read"', async () => {
+    loginAs('priscila')
+    renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Marcar todas como leídas' }))
+
+    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.notifications'))
+    const mine = stored.filter((n) => n.userId === 'u1')
+    expect(mine.every((n) => n.read)).toBe(true)
+    expect(screen.queryByRole('button', { name: 'Marcar todas como leídas' })).not.toBeInTheDocument()
+  })
 })

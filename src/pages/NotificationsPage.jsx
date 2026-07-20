@@ -1,20 +1,27 @@
 import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationsContext'
 import Icon from '../atoms/Icon'
+import Button from '../atoms/Button'
 import { formatDate } from '../utils/dataHelpers'
 import './NotificationsPage.css'
 
 function NotificationsPage() {
   const { user } = useAuth()
-  const { notifications, markAsRead } = useNotifications()
+  const { notifications, markAsRead, markAllAsRead } = useNotifications()
 
   const mine = notifications
     .filter((n) => n.userId === user?.id)
     .sort((a, b) => b.date.localeCompare(a.date))
+  const hasUnread = mine.some((n) => !n.read)
 
   return (
     <div className="notifications-page">
       <h2 className="visually-hidden">Notificaciones</h2>
+      {hasUnread && (
+        <Button variant="ghost" fullWidth onClick={() => markAllAsRead(user.id)}>
+          Marcar todas como leídas
+        </Button>
+      )}
       {mine.length > 0 ? (
         <ul className="notifications-page__list">
           {mine.map((notification) => (
