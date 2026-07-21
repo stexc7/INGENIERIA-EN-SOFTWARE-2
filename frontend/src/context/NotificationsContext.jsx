@@ -1,23 +1,41 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { mockNotifications } from '../mocks/mockData'
+import { api } from '../utils/apiClient'
 import { readStorage, writeStorage } from '../utils/storage'
+import { useAuth } from './AuthContext'
 
 const NotificationsContext = createContext(null)
-const STORAGE_KEY = 'saludfamiliar.notifications'
+const STORAGE_KEY = 'saludfamiliar.notifications.cache'
 
 export function NotificationsProvider({ children }) {
-  const [notifications, setNotifications] = useState(() => readStorage(STORAGE_KEY, mockNotifications))
+  const { user } = useAuth()
+  const [notifications, setNotifications] = useState(() => readStorage(STORAGE_KEY, []))
 
   useEffect(() => {
-    writeStorage(STORAGE_KEY, notifications)
-  }, [notifications])
+    if (!user) return
+    api
+      .get('/notifications')
+      .then(({ notifications: fresh }) => {
+        setNotifications(fresh)
+        writeStorage(STORAGE_KEY, fresh)
+      })
+      .catch(() => {
+        // Sin conexión: se conserva lo último cacheado en localStorage.
+      })
+  }, [user])
 
-  function markAsRead(id) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+  async function markAsRead(id) {
+    const { notification } = await api.patch(`/notifications/${id}/read`)
+    setNotifications((prev) => {
+      const next = prev.map((n) => (n.id === id ? notification : n))
+      writeStorage(STORAGE_KEY, next)
+      return next
+    })
   }
 
-  function markAllAsRead(userId) {
-    setNotifications((prev) => prev.map((n) => (n.userId === userId ? { ...n, read: true } : n)))
+  async function markAllAsRead() {
+    const { notifications: updated } = await api.patch('/notifications/read-all')
+    setNotifications(updated)
+    writeStorage(STORAGE_KEY, updated)
   }
 
   return (

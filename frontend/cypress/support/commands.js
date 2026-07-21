@@ -1,12 +1,4 @@
-const PRISCILA = {
-  id: 'u1',
-  username: 'priscila',
-  name: 'Priscila del Rocío Ordóñez León',
-  age: 63,
-  conditions: ['Diabetes'],
-  accessibility: ['Usa lentes'],
-  avatarInitials: 'PO',
-}
+const API_URL = Cypress.env('apiUrl') || 'http://localhost:4000/api'
 
 function unregisterServiceWorkers(win) {
   if (win.navigator && win.navigator.serviceWorker) {
@@ -27,11 +19,18 @@ Cypress.Commands.add('loginViaUi', (username = 'priscila', password = 'demo1234'
   cy.contains('button', 'Ingresar').click()
 })
 
+// Inicia sesión contra el backend real vía API (rápido, sin pasar por la UI)
+// y deja el token + perfil en localStorage tal como lo dejaría un login normal.
 Cypress.Commands.add('loginAsPriscila', (path = '/inicio') => {
-  cy.visit(path, {
-    onBeforeLoad(win) {
-      unregisterServiceWorkers(win)
-      win.localStorage.setItem('saludfamiliar.session', JSON.stringify(PRISCILA))
+  cy.request('POST', `${API_URL}/auth/login`, { username: 'priscila', password: 'demo1234' }).then(
+    ({ body }) => {
+      cy.visit(path, {
+        onBeforeLoad(win) {
+          unregisterServiceWorkers(win)
+          win.localStorage.setItem('saludfamiliar.token', body.token)
+          win.localStorage.setItem('saludfamiliar.session', JSON.stringify(body.user))
+        },
+      })
     },
-  })
+  )
 })

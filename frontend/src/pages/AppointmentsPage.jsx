@@ -1,30 +1,34 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { useAppointments } from '../context/AppointmentsContext'
 import AppointmentCard from '../molecules/AppointmentCard'
 import Icon from '../atoms/Icon'
 import './AppointmentsPage.css'
 
 function AppointmentsPage() {
-  const { user } = useAuth()
   const { appointments, cancelAppointment } = useAppointments()
   const location = useLocation()
+  const [error, setError] = useState(null)
 
   const today = new Date().toISOString().slice(0, 10)
-  const mine = appointments.filter((appt) => appt.userId === user?.id)
-  const upcoming = mine
+  const upcoming = appointments
     .filter((appt) => appt.date >= today)
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-  const past = mine
+  const past = appointments
     .filter((appt) => appt.date < today)
     .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
 
-  function handleCancel(appointment) {
+  async function handleCancel(appointment) {
     const confirmed = window.confirm(
       `¿Seguro que deseas cancelar tu cita de ${appointment.specialty} del ${appointment.date}?`,
     )
-    if (confirmed) {
-      cancelAppointment(appointment.id)
+    if (!confirmed) return
+
+    setError(null)
+    try {
+      await cancelAppointment(appointment.id)
+    } catch {
+      setError('No se pudo cancelar la cita. Revisa tu conexión e intenta de nuevo.')
     }
   }
 
@@ -34,6 +38,12 @@ function AppointmentsPage() {
         <p className="appointments-page__success" role="status">
           <Icon name="check" size={20} />
           Tu cita fue agendada correctamente.
+        </p>
+      )}
+
+      {error && (
+        <p className="appointments-page__error" role="alert">
+          {error}
         </p>
       )}
 

@@ -1,8 +1,10 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import { Routes, Route } from 'react-router-dom'
 import { screen } from '@testing-library/react'
 import RequireAuth from './RequireAuth'
 import { renderWithProviders, loginAs } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 function Protected() {
   return <p>Contenido protegido</p>
@@ -13,7 +15,7 @@ describe('RequireAuth', () => {
     window.localStorage.clear()
   })
 
-  it('redirects to /login when there is no session', () => {
+  it('redirects to /login when there is no session', async () => {
     renderWithProviders(
       <Routes>
         <Route
@@ -28,10 +30,10 @@ describe('RequireAuth', () => {
       </Routes>,
       { route: '/inicio' },
     )
-    expect(screen.getByText('Pantalla de login')).toBeInTheDocument()
+    expect(await screen.findByText('Pantalla de login')).toBeInTheDocument()
   })
 
-  it('renders the protected content when a session exists', () => {
+  it('renders the protected content when a session exists', async () => {
     loginAs('priscila')
     renderWithProviders(
       <Routes>
@@ -47,6 +49,6 @@ describe('RequireAuth', () => {
       </Routes>,
       { route: '/inicio' },
     )
-    expect(screen.getByText('Contenido protegido')).toBeInTheDocument()
+    expect(await screen.findByText('Contenido protegido')).toBeInTheDocument()
   })
 })

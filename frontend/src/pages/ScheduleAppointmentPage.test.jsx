@@ -1,8 +1,10 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
-import { screen, fireEvent } from '@testing-library/react'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ScheduleAppointmentPage from './ScheduleAppointmentPage'
 import { renderWithProviders, loginAs } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 describe('ScheduleAppointmentPage', () => {
   beforeEach(() => {
@@ -14,6 +16,7 @@ describe('ScheduleAppointmentPage', () => {
     renderWithProviders(<ScheduleAppointmentPage />, { route: '/agendar' })
 
     // Paso 1: especialidad
+    await screen.findByText('Cardiología')
     await userEvent.click(screen.getByText('Cardiología'))
     await userEvent.click(screen.getByRole('button', { name: 'Continuar' }))
 
@@ -27,14 +30,17 @@ describe('ScheduleAppointmentPage', () => {
     expect(screen.getByText('Revisa tu cita')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar cita' }))
 
-    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments'))
-    const created = stored.find((appt) => appt.specialty === 'Cardiología')
-    expect(created).toBeDefined()
-    expect(created.status).toBe('pendiente')
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments.cache'))
+      const created = stored.find((appt) => appt.specialty === 'Cardiología')
+      expect(created).toBeDefined()
+      expect(created.status).toBe('pendiente')
+    })
   })
 
-  it('keeps the continue button disabled until a specialty is chosen', () => {
+  it('keeps the continue button disabled until a specialty is chosen', async () => {
     renderWithProviders(<ScheduleAppointmentPage />, { route: '/agendar' })
+    await screen.findByText('Cardiología')
     expect(screen.getByRole('button', { name: 'Continuar' })).toBeDisabled()
   })
 })

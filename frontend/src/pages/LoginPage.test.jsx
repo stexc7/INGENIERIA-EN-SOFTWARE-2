@@ -1,12 +1,15 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import LoginPage from './LoginPage'
-import { renderWithProviders } from '../test-utils'
+import { renderWithProviders, setupApiMocks } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 describe('LoginPage', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    setupApiMocks({ username: 'priscila' })
   })
 
   it('logs in with valid credentials and redirects', async () => {

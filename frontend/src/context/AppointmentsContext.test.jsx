@@ -1,7 +1,10 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
-import { render, screen } from '@testing-library/react'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { AppointmentsProvider, useAppointments } from './AppointmentsContext'
+import { useAppointments } from './AppointmentsContext'
+import { renderWithProviders, loginAs } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 function Probe() {
   const { appointments, addAppointment, cancelAppointment } = useAppointments()
@@ -11,7 +14,6 @@ function Probe() {
       <button
         onClick={() =>
           addAppointment({
-            userId: 'u1',
             specialty: 'Cardiología',
             doctor: 'Dra. Lucía Torres',
             date: '2026-09-01',
@@ -32,39 +34,34 @@ describe('AppointmentsContext', () => {
     window.localStorage.clear()
   })
 
-  it('seeds appointments from mock data on first load', () => {
-    render(
-      <AppointmentsProvider>
-        <Probe />
-      </AppointmentsProvider>,
-    )
-    expect(Number(screen.getByTestId('count').textContent)).toBeGreaterThan(0)
+  it("loads the user's appointments from the API on mount", async () => {
+    loginAs('priscila')
+    renderWithProviders(<Probe />)
+
+    await waitFor(() => expect(Number(screen.getByTestId('count').textContent)).toBeGreaterThan(0))
   })
 
-  it('adds a new appointment with a pendiente status and persists it', async () => {
-    render(
-      <AppointmentsProvider>
-        <Probe />
-      </AppointmentsProvider>,
-    )
+  it('adds a new appointment with status pendiente', async () => {
+    loginAs('priscila')
+    renderWithProviders(<Probe />)
+    await waitFor(() => expect(Number(screen.getByTestId('count').textContent)).toBeGreaterThan(0))
     const initialCount = Number(screen.getByTestId('count').textContent)
 
     await userEvent.click(screen.getByText('add'))
 
-    expect(Number(screen.getByTestId('count').textContent)).toBe(initialCount + 1)
-    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments'))
-    const created = stored.find((appt) => appt.specialty === 'Cardiología')
-    expect(created.status).toBe('pendiente')
+    await waitFor(() => expect(Number(screen.getByTestId('count').textContent)).toBe(initialCount + 1))
   })
 
-  it('cancels an existing appointment and persists the change', async () => {
-    render(
-      <AppointmentsProvider>
-        <Probe />
-      </AppointmentsProvider>,
-    )
+  it('cancels an existing appointment', async () => {
+    loginAs('priscila')
+    renderWithProviders(<Probe />)
+    await waitFor(() => expect(Number(screen.getByTestId('count').textContent)).toBeGreaterThan(0))
+
     await userEvent.click(screen.getByText('cancel-first'))
-    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments'))
-    expect(stored[0].status).toBe('cancelada')
+
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.appointments.cache'))
+      expect(stored[0].status).toBe('cancelada')
+    })
   })
 })

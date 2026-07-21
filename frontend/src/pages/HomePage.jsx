@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useAppointments } from '../context/AppointmentsContext'
-import { mockPrescriptions } from '../mocks/mockData'
+import { usePrescriptions } from '../context/PrescriptionsContext'
 import { getUpcomingAppointment, getLatestPrescription } from '../utils/dataHelpers'
 import AppointmentCard from '../molecules/AppointmentCard'
 import PrescriptionCard from '../molecules/PrescriptionCard'
@@ -12,8 +12,9 @@ function HomePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { appointments } = useAppointments()
+  const { prescriptions } = usePrescriptions()
   const nextAppointment = getUpcomingAppointment(appointments, user?.id)
-  const latestPrescription = getLatestPrescription(mockPrescriptions, user?.id)
+  const latestPrescription = getLatestPrescription(prescriptions, user?.id)
 
   return (
     <div className="home-page">

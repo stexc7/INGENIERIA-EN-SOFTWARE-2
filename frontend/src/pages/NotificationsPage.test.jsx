@@ -1,47 +1,53 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotificationsPage from './NotificationsPage'
 import { renderWithProviders, loginAs } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 describe('NotificationsPage', () => {
   beforeEach(() => {
     window.localStorage.clear()
   })
 
-  it('shows an empty state for a user with no notifications', () => {
+  it('shows an empty state for a user with no notifications', async () => {
     loginAs('belen')
     renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
-    expect(screen.getByText('No tienes notificaciones por ahora.')).toBeInTheDocument()
+    expect(await screen.findByText('No tienes notificaciones por ahora.')).toBeInTheDocument()
   })
 
-  it("marks a notification as read when clicked", async () => {
+  it('marks a notification as read when clicked', async () => {
     loginAs('priscila')
     renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
 
-    const item = screen.getByRole('button', { name: /Recordatorio de cita/i })
+    const item = await screen.findByRole('button', { name: /Recordatorio de cita/i })
     await userEvent.click(item)
 
-    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.notifications'))
-    const updated = stored.find((n) => n.id === 'n1')
-    expect(updated.read).toBe(true)
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.notifications.cache'))
+      const updated = stored.find((n) => n.id === 'n1')
+      expect(updated.read).toBe(true)
+    })
   })
 
-  it('shows the "mark all as read" button only when there are unread notifications', () => {
+  it('shows the "mark all as read" button only when there are unread notifications', async () => {
     loginAs('priscila')
     renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
-    expect(screen.getByRole('button', { name: 'Marcar todas como leídas' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Marcar todas como leídas' })).toBeInTheDocument()
   })
 
   it('marks every notification as read when clicking "mark all as read"', async () => {
     loginAs('priscila')
     renderWithProviders(<NotificationsPage />, { route: '/notificaciones' })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Marcar todas como leídas' }))
+    const button = await screen.findByRole('button', { name: 'Marcar todas como leídas' })
+    await userEvent.click(button)
 
-    const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.notifications'))
-    const mine = stored.filter((n) => n.userId === 'u1')
-    expect(mine.every((n) => n.read)).toBe(true)
+    await waitFor(() => {
+      const stored = JSON.parse(window.localStorage.getItem('saludfamiliar.notifications.cache'))
+      expect(stored.every((n) => n.read)).toBe(true)
+    })
     expect(screen.queryByRole('button', { name: 'Marcar todas como leídas' })).not.toBeInTheDocument()
   })
 })

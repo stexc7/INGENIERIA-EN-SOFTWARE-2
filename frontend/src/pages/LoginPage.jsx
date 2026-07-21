@@ -16,20 +16,17 @@ function LoginPage() {
     return <Navigate to={redirectTo} replace />
   }
 
-  function handleSubmit({ username, password }) {
+  async function handleSubmit({ username, password }) {
     setIsSubmitting(true)
     setFormError(null)
-    // Simula latencia de red para reflejar un login real.
-    setTimeout(() => {
-      const result = login(username, password)
-      setIsSubmitting(false)
-      if (!result.ok) {
-        setFormError(result.error)
-        return
-      }
-      const redirectTo = location.state?.from?.pathname || '/inicio'
-      navigate(redirectTo, { replace: true })
-    }, 400)
+    const result = await login(username, password)
+    setIsSubmitting(false)
+    if (!result.ok) {
+      setFormError(result.error)
+      return
+    }
+    const redirectTo = location.state?.from?.pathname || '/inicio'
+    navigate(redirectTo, { replace: true })
   }
 
   return (

@@ -1,8 +1,10 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import { MemoryRouter } from 'react-router-dom'
 import { render, screen } from '@testing-library/react'
 import App from './App'
 import { loginAs } from './test-utils'
+
+jest.mock('./utils/apiClient')
 
 describe('App', () => {
   beforeEach(() => {
@@ -18,13 +20,13 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Salud Familiar' })).toBeInTheDocument()
   })
 
-  it('redirects an authenticated user from / to inicio', () => {
+  it('redirects an authenticated user from / to inicio', async () => {
     loginAs('priscila')
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
       </MemoryRouter>,
     )
-    expect(screen.getByText('Tu próxima cita')).toBeInTheDocument()
+    expect(await screen.findByText('Tu próxima cita')).toBeInTheDocument()
   })
 })

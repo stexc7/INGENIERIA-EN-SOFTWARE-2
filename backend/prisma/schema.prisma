@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  username          String   @unique
+  passwordHash      String
+  name              String
+  age               Int
+  avatarInitials    String
+  conditionsJson     String   @default("[]")
+  accessibilityJson  String   @default("[]")
+  createdAt         DateTime @default(now())
+
+  appointments  Appointment[]
+  prescriptions Prescription[]
+  notifications Notification[]
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  userId    String
+  specialty String
+  doctor    String
+  date      String
+  time      String
+  location  String
+  status    String   @default("pendiente")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Prescription {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  doctor       String
+  date         String
+  instructions String
+  createdAt    DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medications Medication[]
+
+  @@index([userId])
+}
+
+model Medication {
+  id             String @id @default(cuid())
+  prescriptionId String
+  name           String
+  dose           String
+  frequency      String
+  duration       String
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@index([prescriptionId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  date      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

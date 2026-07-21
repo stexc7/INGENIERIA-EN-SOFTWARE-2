@@ -1,19 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { mockPrescriptions } from '../mocks/mockData'
+import { usePrescriptions } from '../context/PrescriptionsContext'
 import PrescriptionCard from '../molecules/PrescriptionCard'
 import Input from '../atoms/Input'
 import './PrescriptionsPage.css'
 
 function PrescriptionsPage() {
-  const { user } = useAuth()
   const navigate = useNavigate()
+  const { prescriptions } = usePrescriptions()
   const [query, setQuery] = useState('')
 
-  const mine = mockPrescriptions
-    .filter((rx) => rx.userId === user?.id)
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const mine = [...prescriptions].sort((a, b) => b.date.localeCompare(a.date))
 
   const normalizedQuery = query.trim().toLowerCase()
   const filtered = normalizedQuery

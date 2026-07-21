@@ -1,41 +1,52 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { mockUsers } from '../mocks/mockData'
+import { api, TOKEN_KEY } from '../utils/apiClient'
+import { readStorage, writeStorage } from '../utils/storage'
 
 const AuthContext = createContext(null)
-const STORAGE_KEY = 'saludfamiliar.session'
+const SESSION_KEY = 'saludfamiliar.session'
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => readStorage(SESSION_KEY, null))
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored))
-      } catch {
-        window.localStorage.removeItem(STORAGE_KEY)
-      }
+    const token = window.localStorage.getItem(TOKEN_KEY)
+    if (!token) {
+      setIsReady(true)
+      return
     }
-    setIsReady(true)
+
+    api
+      .get('/auth/me')
+      .then(({ user: freshUser }) => {
+        setUser(freshUser)
+        writeStorage(SESSION_KEY, freshUser)
+      })
+      .catch(() => {
+        // Sin conexión o token vencido: seguimos con el perfil cacheado si existe.
+      })
+      .finally(() => setIsReady(true))
   }, [])
 
-  function login(username, password) {
-    const found = mockUsers.find(
-      (candidate) => candidate.username === username.trim().toLowerCase() && candidate.password === password,
-    )
-    if (!found) {
-      return { ok: false, error: 'Usuario o contraseña incorrectos.' }
+  async function login(username, password) {
+    try {
+      const { token, user: loggedUser } = await api.post('/auth/login', {
+        username: username.trim().toLowerCase(),
+        password,
+      })
+      window.localStorage.setItem(TOKEN_KEY, token)
+      writeStorage(SESSION_KEY, loggedUser)
+      setUser(loggedUser)
+      return { ok: true }
+    } catch (error) {
+      return { ok: false, error: error.message }
     }
-    const { password: _password, ...safeUser } = found
-    setUser(safeUser)
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(safeUser))
-    return { ok: true }
   }
 
   function logout() {
     setUser(null)
-    window.localStorage.removeItem(STORAGE_KEY)
+    window.localStorage.removeItem(TOKEN_KEY)
+    window.localStorage.removeItem(SESSION_KEY)
   }
 
   return (

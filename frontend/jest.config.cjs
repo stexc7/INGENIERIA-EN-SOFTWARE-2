@@ -10,6 +10,9 @@ module.exports = {
     '!src/main.jsx',
     '!src/mocks/**',
     '!src/**/*.test.{js,jsx}',
+    '!src/utils/apiClient.js',
+    '!src/utils/__mocks__/**',
+    '!src/test-utils.jsx',
   ],
   coverageThreshold: {
     global: {

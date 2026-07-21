@@ -1,37 +1,51 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { mockAppointments } from '../mocks/mockData'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { api } from '../utils/apiClient'
 import { readStorage, writeStorage } from '../utils/storage'
+import { useAuth } from './AuthContext'
 
 const AppointmentsContext = createContext(null)
-const STORAGE_KEY = 'saludfamiliar.appointments'
+const STORAGE_KEY = 'saludfamiliar.appointments.cache'
 
 export function AppointmentsProvider({ children }) {
-  const [appointments, setAppointments] = useState(() => readStorage(STORAGE_KEY, mockAppointments))
+  const { user } = useAuth()
+  const [appointments, setAppointments] = useState(() => readStorage(STORAGE_KEY, []))
+
+  const refresh = useCallback(async () => {
+    try {
+      const { appointments: fresh } = await api.get('/appointments')
+      setAppointments(fresh)
+      writeStorage(STORAGE_KEY, fresh)
+    } catch {
+      // Sin conexión: se conserva lo último cacheado en localStorage.
+    }
+  }, [])
 
   useEffect(() => {
-    writeStorage(STORAGE_KEY, appointments)
-  }, [appointments])
+    if (user) refresh()
+  }, [user, refresh])
 
-  function addAppointment(newAppointment) {
-    const appointment = {
-      id: `a${Date.now()}`,
-      status: 'pendiente',
-      ...newAppointment,
-    }
-    setAppointments((prev) => [...prev, appointment])
+  async function addAppointment(newAppointment) {
+    const { appointment } = await api.post('/appointments', newAppointment)
+    setAppointments((prev) => {
+      const next = [...prev, appointment]
+      writeStorage(STORAGE_KEY, next)
+      return next
+    })
     return appointment
   }
 
-  function cancelAppointment(id) {
-    setAppointments((prev) =>
-      prev.map((appointment) =>
-        appointment.id === id ? { ...appointment, status: 'cancelada' } : appointment,
-      ),
-    )
+  async function cancelAppointment(id) {
+    const { appointment } = await api.patch(`/appointments/${id}/cancel`)
+    setAppointments((prev) => {
+      const next = prev.map((item) => (item.id === id ? appointment : item))
+      writeStorage(STORAGE_KEY, next)
+      return next
+    })
+    return appointment
   }
 
   return (
-    <AppointmentsContext.Provider value={{ appointments, addAppointment, cancelAppointment }}>
+    <AppointmentsContext.Provider value={{ appointments, addAppointment, cancelAppointment, refresh }}>
       {children}
     </AppointmentsContext.Provider>
   )

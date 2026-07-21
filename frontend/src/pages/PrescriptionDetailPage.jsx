@@ -1,15 +1,57 @@
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { mockPrescriptions } from '../mocks/mockData'
+import { usePrescriptions } from '../context/PrescriptionsContext'
+import { api } from '../utils/apiClient'
 import { formatDate } from '../utils/dataHelpers'
 import Icon from '../atoms/Icon'
 import './PrescriptionDetailPage.css'
 
 function PrescriptionDetailPage() {
   const { id } = useParams()
-  const prescription = mockPrescriptions.find((rx) => rx.id === id)
+  const { prescriptions } = usePrescriptions()
+  const cached = prescriptions.find((rx) => rx.id === id)
 
-  if (!prescription) {
+  const [prescription, setPrescription] = useState(cached || null)
+  const [notFound, setNotFound] = useState(false)
+  const [isLoading, setIsLoading] = useState(!cached)
+
+  useEffect(() => {
+    if (cached) {
+      setPrescription(cached)
+      setIsLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setIsLoading(true)
+    api
+      .get(`/prescriptions/${id}`)
+      .then(({ prescription: fetched }) => {
+        if (!cancelled) setPrescription(fetched)
+      })
+      .catch(() => {
+        if (!cancelled) setNotFound(true)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  if (notFound) {
     return <Navigate to="/recetas" replace />
+  }
+
+  if (isLoading || !prescription) {
+    return (
+      <div className="prescription-detail">
+        <p>Cargando receta…</p>
+      </div>
+    )
   }
 
   const { title, doctor, date, instructions, medications } = prescription

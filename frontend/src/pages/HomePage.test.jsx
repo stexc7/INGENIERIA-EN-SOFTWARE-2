@@ -1,27 +1,29 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
-import { screen } from '@testing-library/react'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { screen, waitFor } from '@testing-library/react'
 import HomePage from './HomePage'
-import { renderWithProviders, loginAs } from '../test-utils'
+import { renderWithProviders, loginAs, setupApiMocks } from '../test-utils'
+
+jest.mock('../utils/apiClient')
 
 describe('HomePage', () => {
   beforeEach(() => {
     window.localStorage.clear()
   })
 
-  it("shows the logged-in user's next appointment", () => {
+  it("shows the logged-in user's next appointment", async () => {
     loginAs('priscila')
     renderWithProviders(<HomePage />)
+
     expect(screen.getByText('Tu próxima cita')).toBeInTheDocument()
-    expect(screen.getByText('Endocrinología')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('Endocrinología')).toBeInTheDocument())
   })
 
-  it('shows an empty state when the user has no prescriptions', () => {
-    loginAs('augusto')
-    window.localStorage.setItem(
-      'saludfamiliar.appointments',
-      JSON.stringify([]),
-    )
+  it('shows an empty state when the user has no upcoming appointments', async () => {
+    window.localStorage.setItem('saludfamiliar.token', 'fake-token')
+    setupApiMocks({ username: 'augusto', appointments: [] })
+
     renderWithProviders(<HomePage />)
-    expect(screen.getByText('No tienes citas próximas.')).toBeInTheDocument()
+
+    await waitFor(() => expect(screen.getByText('No tienes citas próximas.')).toBeInTheDocument())
   })
 })
