@@ -20,7 +20,14 @@ cypress/screenshots
 cypress/downloads
 
 # Local Claude Code settings
-.claude/settings.local.json
+.claude/
+
+# Backend: base de datos local y secretos
+backend/prisma/*.db
+backend/prisma/*.db-journal
+.env
+.env.local
+*.env
 
 # Editor directories and files
 .vscode/*
