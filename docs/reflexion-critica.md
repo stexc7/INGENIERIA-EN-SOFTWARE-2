@@ -2,6 +2,8 @@
 
 ## Proyecto: Salud Familiar (PWA)
 
+> **Nota de actualización:** esta reflexión se redactó cuando la aplicación funcionaba con datos *mock* en el cliente. Posteriormente se incorporó un **backend real** (Express + Prisma + SQLite, autenticación JWT) en `backend/`, cumpliendo el requisito de persistencia en base de datos. La estrategia de resiliencia descrita en la Sección 2 se mantuvo conceptualmente: `localStorage` pasó de ser la única fuente de datos a ser una **caché de lectura** que se sincroniza contra la API real y sirve como respaldo cuando no hay conexión. El punto 1 de la Sección 6 ("Backend real y autenticación robusta") ya está implementado.
+
 ## 1. Introducción
 
 El desarrollo de **Salud Familiar** como Progressive Web App constituyó un ejercicio integral de ingeniería de software centrado en el usuario, en el que convergieron decisiones de arquitectura frontend, principios de accesibilidad universal (WCAG 2.1) y estrategias de resiliencia propias del paradigma *offline-first*. A diferencia de un desarrollo web convencional, una PWA orientada a un segmento etario de adultos mayores con comorbilidades (diabetes, artritis, hipoacusia, baja agudeza visual) exige que las decisiones técnicas no se evalúen únicamente por su corrección funcional, sino por su impacto directo en la usabilidad real de personas con limitaciones sensoriales y motrices. A continuación se documenta un análisis crítico del proceso, organizado en los ejes de resiliencia, accesibilidad, experiencia de usuario, dificultades técnicas encontradas y mejoras prospectivas.
